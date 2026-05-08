@@ -20,8 +20,13 @@ import {
   Avatar,
   AvatarGroup,
   CircularProgress,
+  Fab,
+  Slide,
+  IconButton,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
-import { Add, Groups, People, Search } from '@mui/icons-material';
+import { Add, Close, Groups, People, Search } from '@mui/icons-material';
 import useAuthStore from '@/store/authStore';
 import { communityAPI } from '@/lib/api';
 
@@ -48,6 +53,8 @@ const categoryColors = {
 };
 
 export default function CommunitiesPage() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { user, initialize } = useAuthStore();
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -113,14 +120,14 @@ export default function CommunitiesPage() {
     : communities;
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: 4 }}>
-      <Container maxWidth="lg">
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-          <Typography variant="h4" fontWeight={700}>
-            <Groups sx={{ color: 'secondary.main', verticalAlign: 'middle', mr: 1 }} />
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: { xs: 10, md: 4 }, pt: { xs: 2, md: 4 } }}>
+      <Container maxWidth="lg" sx={{ px: { xs: 1.5, sm: 2, md: 3 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 2, md: 4 } }}>
+          <Typography variant={isMobile ? 'h5' : 'h4'} fontWeight={700}>
+            <Groups sx={{ color: 'secondary.main', verticalAlign: 'middle', mr: 0.5, fontSize: { xs: 24, md: 28 } }} />
             Communities
           </Typography>
-          {user && (
+          {user && !isMobile && (
             <Button
               variant="contained"
               color="secondary"
@@ -139,11 +146,12 @@ export default function CommunitiesPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           InputProps={{ startAdornment: <Search sx={{ color: 'text.secondary', mr: 1 }} /> }}
-          sx={{ mb: 3 }}
+          size={isMobile ? 'small' : 'medium'}
+          sx={{ mb: { xs: 2, md: 3 } }}
         />
 
         {/* Category Filter */}
-        <Stack direction="row" spacing={1} sx={{ mb: 4, flexWrap: 'wrap' }}>
+        <Stack direction="row" spacing={1} sx={{ mb: { xs: 2, md: 4 }, flexWrap: 'nowrap', overflowX: 'auto', pb: 1, '&::-webkit-scrollbar': { display: 'none' } }}>
           <Chip
             label="All"
             onClick={() => setFilterCategory('')}
@@ -174,7 +182,7 @@ export default function CommunitiesPage() {
             </Typography>
           </Card>
         ) : (
-          <Grid container spacing={3}>
+          <Grid container spacing={{ xs: 1.5, md: 3 }}>
             {filtered.map((community) => {
               const isMember = community.members?.some(
                 (m) => (typeof m === 'string' ? m : m._id) === user?._id
@@ -199,9 +207,9 @@ export default function CommunitiesPage() {
                         borderRadius: '16px 16px 0 0',
                       }}
                     />
-                    <CardContent sx={{ pt: 3 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="h6" fontWeight={600}>
+                    <CardContent sx={{ pt: { xs: 2, md: 3 }, px: { xs: 2, md: 2 }, pb: { xs: 1.5, md: 2 }, '&:last-child': { pb: { xs: 1.5, md: 2 } } }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                        <Typography variant={isMobile ? 'body1' : 'h6'} fontWeight={600} noWrap sx={{ maxWidth: '60%' }}>
                           {community.name}
                         </Typography>
                         <Chip
@@ -264,9 +272,40 @@ export default function CommunitiesPage() {
           </Grid>
         )}
 
+        {/* Mobile FAB */}
+        {user && isMobile && (
+          <Fab
+            color="secondary"
+            onClick={() => setDialogOpen(true)}
+            sx={{
+              position: 'fixed',
+              bottom: 80,
+              right: 20,
+              width: 56,
+              height: 56,
+              boxShadow: '0 4px 20px rgba(255,109,0,0.4)',
+            }}
+          >
+            <Add />
+          </Fab>
+        )}
+
         {/* Create Community Dialog */}
-        <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle sx={{ fontWeight: 600 }}>Create New Community</DialogTitle>
+        <Dialog
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          maxWidth="sm"
+          fullWidth
+          fullScreen={isMobile}
+          TransitionComponent={isMobile ? Slide : undefined}
+          TransitionProps={isMobile ? { direction: 'up' } : undefined}
+        >
+          <DialogTitle sx={{ fontWeight: 600, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            Create New Community
+            {isMobile && (
+              <IconButton onClick={() => setDialogOpen(false)}><Close /></IconButton>
+            )}
+          </DialogTitle>
           <DialogContent>
             <TextField
               fullWidth
@@ -298,13 +337,15 @@ export default function CommunitiesPage() {
               ))}
             </TextField>
           </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2 }}>
-            <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
+          <DialogActions sx={{ px: 3, pb: { xs: 3, md: 2 }, flexDirection: { xs: 'column', md: 'row' }, gap: 1 }}>
+            <Button onClick={() => setDialogOpen(false)} fullWidth={isMobile} sx={{ minHeight: 44 }}>Cancel</Button>
             <Button
               variant="contained"
               color="secondary"
               onClick={handleCreate}
               disabled={!form.name.trim()}
+              fullWidth={isMobile}
+              sx={{ minHeight: 44 }}
             >
               Create
             </Button>

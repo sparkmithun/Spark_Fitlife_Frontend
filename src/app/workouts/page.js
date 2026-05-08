@@ -19,9 +19,14 @@ import {
   Stack,
   IconButton,
   CircularProgress,
+  Fab,
+  Slide,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import {
   Add,
+  Close,
   FitnessCenter,
   DirectionsRun,
   DirectionsWalk,
@@ -58,6 +63,8 @@ const typeColors = {
 };
 
 export default function WorkoutsPage() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { user, initialize } = useAuthStore();
   const [workouts, setWorkouts] = useState([]);
   const [stats, setStats] = useState([]);
@@ -142,43 +149,45 @@ export default function WorkoutsPage() {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: 4 }}>
-      <Container maxWidth="lg">
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-          <Typography variant="h4" fontWeight={700}>
-            <FitnessCenter sx={{ color: 'secondary.main', verticalAlign: 'middle', mr: 1 }} />
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: { xs: 10, md: 4 }, pt: { xs: 2, md: 4 } }}>
+      <Container maxWidth="lg" sx={{ px: { xs: 1.5, sm: 2, md: 3 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 2, md: 4 } }}>
+          <Typography variant={isMobile ? 'h5' : 'h4'} fontWeight={700}>
+            <FitnessCenter sx={{ color: 'secondary.main', verticalAlign: 'middle', mr: 0.5, fontSize: { xs: 24, md: 28 } }} />
             My Workouts
           </Typography>
-          <Button
-            variant="contained"
-            color="secondary"
-            startIcon={<Add />}
-            onClick={() => setDialogOpen(true)}
-          >
-            Log Workout
-          </Button>
+          {!isMobile && (
+            <Button
+              variant="contained"
+              color="secondary"
+              startIcon={<Add />}
+              onClick={() => setDialogOpen(true)}
+            >
+              Log Workout
+            </Button>
+          )}
         </Box>
 
         {/* Stats Cards */}
-        <Grid container spacing={2} sx={{ mb: 4 }}>
+        <Grid container spacing={{ xs: 1, md: 2 }} sx={{ mb: { xs: 2, md: 4 } }}>
           {[
-            { label: 'Total Workouts', value: totalWorkouts, icon: <FitnessCenter />, color: '#1E88E5' },
-            { label: 'Total Duration', value: `${totalDuration} min`, icon: <Timer />, color: '#FF6D00' },
-            { label: 'Calories Burned', value: totalCalories, icon: <LocalFireDepartment />, color: '#EF5350' },
-            { label: 'Distance', value: `${totalDistance.toFixed(1)} km`, icon: <DirectionsRun />, color: '#66BB6A' },
+            { label: 'Workouts', value: totalWorkouts, icon: <FitnessCenter />, color: '#1E88E5' },
+            { label: 'Duration', value: `${totalDuration}m`, icon: <Timer />, color: '#FF6D00' },
+            { label: 'Calories', value: totalCalories, icon: <LocalFireDepartment />, color: '#EF5350' },
+            { label: 'Distance', value: `${totalDistance.toFixed(1)}km`, icon: <DirectionsRun />, color: '#66BB6A' },
           ].map((stat, i) => (
-            <Grid item xs={6} md={3} key={i}>
-              <Card sx={{ textAlign: 'center', py: 3 }}>
-                <Box sx={{ color: stat.color, mb: 1 }}>{stat.icon}</Box>
-                <Typography variant="h5" fontWeight={700}>{stat.value}</Typography>
-                <Typography variant="caption" color="text.secondary">{stat.label}</Typography>
+            <Grid item xs={3} md={3} key={i}>
+              <Card sx={{ textAlign: 'center', py: { xs: 1.5, md: 3 }, px: { xs: 0.5, md: 2 } }}>
+                <Box sx={{ color: stat.color, mb: 0.5, '& svg': { fontSize: { xs: 20, md: 24 } } }}>{stat.icon}</Box>
+                <Typography variant={isMobile ? 'body1' : 'h5'} fontWeight={700} fontSize={{ xs: '1rem', md: '1.5rem' }}>{stat.value}</Typography>
+                <Typography variant="caption" color="text.secondary" fontSize={{ xs: '0.6rem', md: '0.75rem' }}>{stat.label}</Typography>
               </Card>
             </Grid>
           ))}
         </Grid>
 
         {/* Filter */}
-        <Stack direction="row" spacing={1} sx={{ mb: 3, flexWrap: 'wrap' }}>
+        <Stack direction="row" spacing={1} sx={{ mb: { xs: 2, md: 3 }, flexWrap: 'nowrap', overflowX: 'auto', pb: 1, '&::-webkit-scrollbar': { display: 'none' } }}>
           <Chip
             label="All"
             onClick={() => setFilterType('')}
@@ -209,7 +218,7 @@ export default function WorkoutsPage() {
             </Typography>
           </Card>
         ) : (
-          <Grid container spacing={2}>
+          <Grid container spacing={{ xs: 1.5, md: 2 }}>
             {workouts.map((w) => (
               <Grid item xs={12} sm={6} md={4} key={w._id}>
                 <Card
@@ -220,8 +229,8 @@ export default function WorkoutsPage() {
                     '&:hover': { transform: 'translateY(-2px)' },
                   }}
                 >
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <CardContent sx={{ p: { xs: 1.5, md: 2 }, '&:last-child': { pb: { xs: 1.5, md: 2 } } }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                       <Chip
                         label={w.type}
                         size="small"
@@ -232,28 +241,28 @@ export default function WorkoutsPage() {
                           textTransform: 'capitalize',
                         }}
                       />
-                      <IconButton size="small" onClick={() => handleDelete(w._id)}>
+                      <IconButton size="small" onClick={() => handleDelete(w._id)} sx={{ minWidth: 40, minHeight: 40 }}>
                         <Delete fontSize="small" />
                       </IconButton>
                     </Box>
-                    <Typography variant="h6" fontWeight={600} gutterBottom>
+                    <Typography variant={isMobile ? 'body1' : 'h6'} fontWeight={600} gutterBottom>
                       {w.title}
                     </Typography>
-                    <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
+                    <Stack direction="row" spacing={{ xs: 1.5, md: 2 }} sx={{ mb: 0.5 }}>
                       <Box>
-                        <Typography variant="caption" color="text.secondary">Duration</Typography>
-                        <Typography fontWeight={600}>{w.duration} min</Typography>
+                        <Typography variant="caption" color="text.secondary" fontSize={{ xs: '0.65rem', md: '0.75rem' }}>Duration</Typography>
+                        <Typography fontWeight={600} fontSize={{ xs: '0.85rem', md: '1rem' }}>{w.duration} min</Typography>
                       </Box>
                       {w.distance > 0 && (
                         <Box>
-                          <Typography variant="caption" color="text.secondary">Distance</Typography>
-                          <Typography fontWeight={600}>{w.distance} km</Typography>
+                          <Typography variant="caption" color="text.secondary" fontSize={{ xs: '0.65rem', md: '0.75rem' }}>Distance</Typography>
+                          <Typography fontWeight={600} fontSize={{ xs: '0.85rem', md: '1rem' }}>{w.distance} km</Typography>
                         </Box>
                       )}
                       {w.calories > 0 && (
                         <Box>
-                          <Typography variant="caption" color="text.secondary">Calories</Typography>
-                          <Typography fontWeight={600}>{w.calories}</Typography>
+                          <Typography variant="caption" color="text.secondary" fontSize={{ xs: '0.65rem', md: '0.75rem' }}>Calories</Typography>
+                          <Typography fontWeight={600} fontSize={{ xs: '0.85rem', md: '1rem' }}>{w.calories}</Typography>
                         </Box>
                       )}
                     </Stack>
@@ -276,9 +285,40 @@ export default function WorkoutsPage() {
           </Grid>
         )}
 
+        {/* Mobile FAB */}
+        {isMobile && (
+          <Fab
+            color="secondary"
+            onClick={() => setDialogOpen(true)}
+            sx={{
+              position: 'fixed',
+              bottom: 80,
+              right: 20,
+              width: 56,
+              height: 56,
+              boxShadow: '0 4px 20px rgba(255,109,0,0.4)',
+            }}
+          >
+            <Add />
+          </Fab>
+        )}
+
         {/* Create Workout Dialog */}
-        <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle sx={{ fontWeight: 600 }}>Log New Workout</DialogTitle>
+        <Dialog
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          maxWidth="sm"
+          fullWidth
+          fullScreen={isMobile}
+          TransitionComponent={isMobile ? Slide : undefined}
+          TransitionProps={isMobile ? { direction: 'up' } : undefined}
+        >
+          <DialogTitle sx={{ fontWeight: 600, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            Log New Workout
+            {isMobile && (
+              <IconButton onClick={() => setDialogOpen(false)}><Close /></IconButton>
+            )}
+          </DialogTitle>
           <DialogContent>
             <TextField
               fullWidth
@@ -337,13 +377,15 @@ export default function WorkoutsPage() {
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
             />
           </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2 }}>
-            <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
+          <DialogActions sx={{ px: 3, pb: { xs: 3, md: 2 }, flexDirection: { xs: 'column', md: 'row' }, gap: 1 }}>
+            <Button onClick={() => setDialogOpen(false)} fullWidth={isMobile} sx={{ minHeight: 44 }}>Cancel</Button>
             <Button
               variant="contained"
               color="secondary"
               onClick={handleCreate}
               disabled={!form.title || !form.duration}
+              fullWidth={isMobile}
+              sx={{ minHeight: 44 }}
             >
               Save Workout
             </Button>

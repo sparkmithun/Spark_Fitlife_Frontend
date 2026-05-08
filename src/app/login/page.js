@@ -50,12 +50,12 @@ export default function LoginPage() {
           'radial-gradient(ellipse at 30% 50%, rgba(30,136,229,0.1) 0%, transparent 50%), #0A0A0A',
       }}
     >
-      <Container maxWidth="sm">
-        <Card sx={{ p: 2 }}>
-          <CardContent>
-            <Box sx={{ textAlign: 'center', mb: 4 }}>
-              <FlashOn sx={{ color: 'secondary.main', fontSize: 48, mb: 1 }} />
-              <Typography variant="h4" fontWeight={700}>
+      <Container maxWidth="sm" sx={{ px: { xs: 2, sm: 3 } }}>
+        <Card sx={{ p: { xs: 1, sm: 2 } }}>
+          <CardContent sx={{ px: { xs: 1.5, sm: 3 } }}>
+            <Box sx={{ textAlign: 'center', mb: { xs: 3, md: 4 } }}>
+              <FlashOn sx={{ color: 'secondary.main', fontSize: { xs: 40, md: 48 }, mb: 1 }} />
+              <Typography variant="h5" fontWeight={700}>
                 Welcome Back
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -104,7 +104,7 @@ export default function LoginPage() {
                 fullWidth
                 size="large"
                 disabled={loading}
-                sx={{ mb: 2 }}
+                sx={{ mb: 2, minHeight: 48 }}
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>

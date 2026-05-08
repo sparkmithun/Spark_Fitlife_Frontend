@@ -10,13 +10,14 @@ export default function HeroSection() {
   return (
     <Box
       sx={{
-        minHeight: '85vh',
+        minHeight: { xs: '90vh', md: '85vh' },
         display: 'flex',
         alignItems: 'center',
         background:
           'radial-gradient(ellipse at 20% 50%, rgba(30,136,229,0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 50%, rgba(255,109,0,0.1) 0%, transparent 50%), #0A0A0A',
         position: 'relative',
         overflow: 'hidden',
+        pb: { xs: 10, md: 0 },
       }}
     >
       {/* Decorative glow */}
@@ -34,7 +35,7 @@ export default function HeroSection() {
         }}
       />
 
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
         <Box sx={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
           <Box
             sx={{
@@ -88,10 +89,10 @@ export default function HeroSection() {
             </Box>
           </Typography>
 
-          <Typography
+            <Typography
             variant="h6"
             color="text.secondary"
-            sx={{ maxWidth: 620, mx: 'auto', mb: 5, fontWeight: 400, lineHeight: 1.6 }}
+            sx={{ maxWidth: 620, mx: 'auto', mb: { xs: 4, md: 5 }, fontWeight: 400, lineHeight: 1.6, fontSize: { xs: '0.95rem', md: '1.25rem' }, px: { xs: 1, md: 0 } }}
           >
             Share fitness thoughts, monitor your workouts, track every run & walk,
             and connect with communities that push you forward.
@@ -103,7 +104,7 @@ export default function HeroSection() {
               color="secondary"
               size="large"
               onClick={() => router.push('/register')}
-              sx={{ px: 5, py: 1.5, fontSize: '1.05rem' }}
+              sx={{ px: { xs: 4, md: 5 }, py: 1.5, fontSize: '1.05rem', minHeight: 48 }}
             >
               Get Started Free
             </Button>
@@ -112,9 +113,10 @@ export default function HeroSection() {
               size="large"
               onClick={() => router.push('/feed')}
               sx={{
-                px: 5,
+                px: { xs: 4, md: 5 },
                 py: 1.5,
                 fontSize: '1.05rem',
+                minHeight: 48,
                 borderColor: 'rgba(255,255,255,0.2)',
                 color: 'text.primary',
                 '&:hover': { borderColor: 'primary.main' },
@@ -127,24 +129,24 @@ export default function HeroSection() {
           {/* Stats */}
           <Stack
             direction="row"
-            spacing={6}
+            spacing={{ xs: 3, md: 6 }}
             justifyContent="center"
-            sx={{ mt: 8, opacity: 0.7 }}
+            sx={{ mt: { xs: 5, md: 8 }, opacity: 0.7 }}
           >
             <Box sx={{ textAlign: 'center' }}>
-              <DirectionsRun sx={{ color: 'secondary.main', fontSize: 28 }} />
-              <Typography variant="h5" fontWeight={700}>10K+</Typography>
-              <Typography variant="caption" color="text.secondary">Active Members</Typography>
+              <DirectionsRun sx={{ color: 'secondary.main', fontSize: { xs: 22, md: 28 } }} />
+              <Typography variant="h6" fontWeight={700} fontSize={{ xs: '1rem', md: '1.25rem' }}>10K+</Typography>
+              <Typography variant="caption" color="text.secondary" fontSize={{ xs: '0.6rem', md: '0.75rem' }}>Active Members</Typography>
             </Box>
             <Box sx={{ textAlign: 'center' }}>
-              <Groups sx={{ color: 'primary.main', fontSize: 28 }} />
-              <Typography variant="h5" fontWeight={700}>500+</Typography>
-              <Typography variant="caption" color="text.secondary">Communities</Typography>
+              <Groups sx={{ color: 'primary.main', fontSize: { xs: 22, md: 28 } }} />
+              <Typography variant="h6" fontWeight={700} fontSize={{ xs: '1rem', md: '1.25rem' }}>500+</Typography>
+              <Typography variant="caption" color="text.secondary" fontSize={{ xs: '0.6rem', md: '0.75rem' }}>Communities</Typography>
             </Box>
             <Box sx={{ textAlign: 'center' }}>
-              <FlashOn sx={{ color: 'secondary.main', fontSize: 28 }} />
-              <Typography variant="h5" fontWeight={700}>1M+</Typography>
-              <Typography variant="caption" color="text.secondary">Workouts Logged</Typography>
+              <FlashOn sx={{ color: 'secondary.main', fontSize: { xs: 22, md: 28 } }} />
+              <Typography variant="h6" fontWeight={700} fontSize={{ xs: '1rem', md: '1.25rem' }}>1M+</Typography>
+              <Typography variant="caption" color="text.secondary" fontSize={{ xs: '0.6rem', md: '0.75rem' }}>Workouts Logged</Typography>
             </Box>
           </Stack>
         </Box>

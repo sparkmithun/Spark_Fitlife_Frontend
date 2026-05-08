@@ -20,6 +20,14 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Fab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  useMediaQuery,
+  useTheme,
+  Slide,
 } from '@mui/material';
 import {
   FavoriteBorder,
@@ -29,6 +37,7 @@ import {
   FlashOn,
   AddPhotoAlternate,
   Close,
+  Add,
 } from '@mui/icons-material';
 import useAuthStore from '@/store/authStore';
 import { postAPI } from '@/lib/api';
@@ -51,6 +60,8 @@ const categoryColors = {
 };
 
 export default function FeedPage() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { user, initialize } = useAuthStore();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,6 +71,7 @@ export default function FeedPage() {
   const [showComments, setShowComments] = useState({});
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   useEffect(() => {
     initialize();
@@ -93,6 +105,7 @@ export default function FeedPage() {
       setNewPost({ content: '', category: 'thought' });
       setSelectedImage(null);
       setImagePreview(null);
+      setCreateDialogOpen(false);
       fetchPosts();
     } catch (err) {
       console.error('Failed to create post');
@@ -139,103 +152,141 @@ export default function FeedPage() {
     }
   };
 
-  return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: 4 }}>
-      <Container maxWidth="md">
-        <Typography variant="h4" fontWeight={700} sx={{ mb: 4 }}>
-          <FlashOn sx={{ color: 'secondary.main', verticalAlign: 'middle', mr: 1 }} />
-          Community Feed
-        </Typography>
+  // Create Post Dialog (full screen on mobile)
+  const CreatePostDialog = () => (
+    <Dialog
+      open={createDialogOpen}
+      onClose={() => setCreateDialogOpen(false)}
+      fullScreen={isMobile}
+      fullWidth
+      maxWidth="sm"
+      TransitionComponent={isMobile ? Slide : undefined}
+      TransitionProps={isMobile ? { direction: 'up' } : undefined}
+    >
+      <DialogTitle
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          pb: 1,
+        }}
+      >
+        <Typography variant="h6" fontWeight={600}>Create Post</Typography>
+        <IconButton onClick={() => setCreateDialogOpen(false)}>
+          <Close />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent sx={{ pt: 1 }}>
+        <TextField
+          fullWidth
+          multiline
+          minRows={isMobile ? 4 : 3}
+          placeholder="What's on your fitness mind?"
+          value={newPost.content}
+          onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
+          sx={{ mb: 2 }}
+          autoFocus
+        />
 
-        {/* Create Post */}
-        {user && (
-          <Card sx={{ mb: 4, p: 1 }}>
+        {imagePreview && (
+          <Box sx={{ position: 'relative', mb: 2 }}>
+            <Box
+              component="img"
+              src={imagePreview}
+              sx={{
+                width: '100%',
+                maxHeight: isMobile ? 200 : 250,
+                borderRadius: 2,
+                objectFit: 'cover',
+              }}
+            />
+            <IconButton
+              size="small"
+              onClick={clearSelectedImage}
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                bgcolor: 'rgba(0,0,0,0.7)',
+                '&:hover': { bgcolor: 'rgba(0,0,0,0.9)' },
+              }}
+            >
+              <Close fontSize="small" />
+            </IconButton>
+          </Box>
+        )}
+
+        <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+          <InputLabel>Category</InputLabel>
+          <Select
+            value={newPost.category}
+            label="Category"
+            onChange={(e) => setNewPost({ ...newPost, category: e.target.value })}
+          >
+            {categories.map((c) => (
+              <MenuItem key={c.value} value={c.value}>{c.label}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 3, pt: 0, gap: 1 }}>
+        <Button
+          component="label"
+          variant="outlined"
+          startIcon={<AddPhotoAlternate />}
+          sx={{ mr: 'auto' }}
+        >
+          Photo
+          <input
+            type="file"
+            hidden
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleImageSelect}
+          />
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={handleCreatePost}
+          disabled={posting || !newPost.content.trim()}
+          endIcon={<Send />}
+          sx={{ minWidth: 100 }}
+        >
+          {posting ? 'Posting...' : 'Post'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
+  return (
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: { xs: 10, md: 4 }, pt: { xs: 2, md: 4 } }}>
+      <Container maxWidth="sm" sx={{ px: { xs: 1.5, sm: 2, md: 3 } }}>
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, px: { xs: 0.5, md: 0 } }}>
+          <Typography variant={isMobile ? 'h5' : 'h4'} fontWeight={700}>
+            <FlashOn sx={{ color: 'secondary.main', verticalAlign: 'middle', mr: 0.5, fontSize: { xs: 24, md: 28 } }} />
+            Feed
+          </Typography>
+        </Box>
+
+        {/* Desktop Create Post Card */}
+        {user && !isMobile && (
+          <Card sx={{ mb: 3, p: 1 }}>
             <CardContent>
               <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-                <Avatar sx={{ bgcolor: 'primary.main' }}>{user.name?.[0]?.toUpperCase()}</Avatar>
-                <Box sx={{ flexGrow: 1 }}>
+                <Avatar sx={{ bgcolor: 'primary.main' }} src={user.avatar}>
+                  {user.name?.[0]?.toUpperCase()}
+                </Avatar>
+                <Box
+                  sx={{ flexGrow: 1, cursor: 'pointer' }}
+                  onClick={() => setCreateDialogOpen(true)}
+                >
                   <TextField
                     fullWidth
-                    multiline
-                    minRows={2}
                     placeholder="Share your fitness thoughts..."
-                    value={newPost.content}
-                    onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-                    sx={{ mb: 2 }}
+                    InputProps={{ readOnly: true }}
+                    sx={{ pointerEvents: 'none' }}
                   />
-
-                  {/* Image Preview */}
-                  {imagePreview && (
-                    <Box sx={{ position: 'relative', mb: 2, display: 'inline-block' }}>
-                      <Box
-                        component="img"
-                        src={imagePreview}
-                        sx={{
-                          maxWidth: '100%',
-                          maxHeight: 200,
-                          borderRadius: 2,
-                          objectFit: 'cover',
-                        }}
-                      />
-                      <IconButton
-                        size="small"
-                        onClick={clearSelectedImage}
-                        sx={{
-                          position: 'absolute',
-                          top: 4,
-                          right: 4,
-                          bgcolor: 'rgba(0,0,0,0.6)',
-                          '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' },
-                        }}
-                      >
-                        <Close fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  )}
-
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <FormControl size="small" sx={{ minWidth: 130 }}>
-                        <InputLabel>Category</InputLabel>
-                        <Select
-                          value={newPost.category}
-                          label="Category"
-                          onChange={(e) => setNewPost({ ...newPost, category: e.target.value })}
-                        >
-                          {categories.map((c) => (
-                            <MenuItem key={c.value} value={c.value}>{c.label}</MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-
-                      {/* Image Upload Button */}
-                      <IconButton
-                        component="label"
-                        color="secondary"
-                        sx={{
-                          bgcolor: 'rgba(255,109,0,0.1)',
-                          '&:hover': { bgcolor: 'rgba(255,109,0,0.2)' },
-                        }}
-                      >
-                        <AddPhotoAlternate />
-                        <input
-                          type="file"
-                          hidden
-                          accept="image/jpeg,image/png,image/webp"
-                          onChange={handleImageSelect}
-                        />
-                      </IconButton>
-                    </Box>
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      onClick={handleCreatePost}
-                      disabled={posting || !newPost.content.trim()}
-                      endIcon={<Send />}
-                    >
-                      {posting ? 'Posting...' : 'Post'}
-                    </Button>
-                  </Box>
                 </Box>
               </Box>
             </CardContent>
@@ -248,27 +299,32 @@ export default function FeedPage() {
             <CircularProgress color="primary" />
           </Box>
         ) : posts.length === 0 ? (
-          <Card sx={{ textAlign: 'center', py: 8 }}>
+          <Card sx={{ textAlign: 'center', py: 6, mx: { xs: 0 } }}>
             <Typography variant="h6" color="text.secondary">
               No posts yet. Be the first to share!
             </Typography>
           </Card>
         ) : (
-          <Stack spacing={3}>
+          <Stack spacing={{ xs: 1.5, md: 3 }}>
             {posts.map((post) => (
-              <Card key={post._id}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                    <Avatar sx={{ bgcolor: 'primary.main' }}>
+              <Card key={post._id} sx={{ borderRadius: { xs: 2, md: 4 } }}>
+                <CardContent sx={{ px: { xs: 2, md: 3 }, py: { xs: 1.5, md: 2 } }}>
+                  {/* Post Header */}
+                  <Box sx={{ display: 'flex', gap: 1.5, mb: 1.5, alignItems: 'center' }}>
+                    <Avatar
+                      sx={{ width: { xs: 36, md: 40 }, height: { xs: 36, md: 40 }, bgcolor: 'primary.main' }}
+                      src={post.author?.avatar}
+                    >
                       {post.author?.name?.[0]?.toUpperCase()}
                     </Avatar>
-                    <Box>
-                      <Typography fontWeight={600}>{post.author?.name}</Typography>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography fontWeight={600} fontSize={{ xs: '0.9rem', md: '1rem' }} noWrap>
+                        {post.author?.name}
+                      </Typography>
                       <Typography variant="caption" color="text.secondary">
                         {new Date(post.createdAt).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
-                          year: 'numeric',
                         })}
                       </Typography>
                     </Box>
@@ -276,14 +332,20 @@ export default function FeedPage() {
                       label={post.category}
                       size="small"
                       sx={{
-                        ml: 'auto',
                         bgcolor: `${categoryColors[post.category]}20`,
                         color: categoryColors[post.category],
                         fontWeight: 600,
+                        fontSize: '0.7rem',
+                        height: 24,
                       }}
                     />
                   </Box>
-                  <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.7 }}>
+
+                  {/* Post Content */}
+                  <Typography
+                    variant="body2"
+                    sx={{ mb: 1.5, lineHeight: 1.7, fontSize: { xs: '0.9rem', md: '0.95rem' } }}
+                  >
                     {post.content}
                   </Typography>
 
@@ -292,10 +354,10 @@ export default function FeedPage() {
                     <Box
                       component="img"
                       src={post.image}
-                      alt="Post image"
+                      alt="Post"
                       sx={{
                         width: '100%',
-                        maxHeight: 400,
+                        maxHeight: { xs: 250, md: 400 },
                         objectFit: 'cover',
                         borderRadius: 2,
                         mb: 1,
@@ -303,12 +365,14 @@ export default function FeedPage() {
                     />
                   )}
                 </CardContent>
-                <Divider />
-                <CardActions sx={{ px: 2 }}>
+
+                {/* Actions */}
+                <CardActions sx={{ px: { xs: 1.5, md: 2 }, py: 0.5 }}>
                   <IconButton
                     size="small"
                     onClick={() => handleLike(post._id)}
                     color={post.likes?.includes(user?._id) ? 'error' : 'default'}
+                    sx={{ minWidth: 44, minHeight: 44 }}
                   >
                     {post.likes?.includes(user?._id) ? <Favorite /> : <FavoriteBorder />}
                   </IconButton>
@@ -320,26 +384,27 @@ export default function FeedPage() {
                     onClick={() =>
                       setShowComments({ ...showComments, [post._id]: !showComments[post._id] })
                     }
+                    sx={{ minWidth: 44, minHeight: 44 }}
                   >
                     <ChatBubbleOutline />
                   </IconButton>
                   <Typography variant="caption">{post.comments?.length || 0}</Typography>
                 </CardActions>
 
-                {/* Comments */}
+                {/* Comments Section */}
                 {showComments[post._id] && (
-                  <Box sx={{ px: 3, pb: 2 }}>
-                    <Divider sx={{ mb: 2 }} />
+                  <Box sx={{ px: { xs: 2, md: 3 }, pb: 2 }}>
+                    <Divider sx={{ mb: 1.5 }} />
                     {post.comments?.map((c, i) => (
                       <Box key={i} sx={{ display: 'flex', gap: 1, mb: 1.5 }}>
-                        <Avatar sx={{ width: 28, height: 28, fontSize: 14, bgcolor: 'primary.dark' }}>
+                        <Avatar sx={{ width: 26, height: 26, fontSize: 12, bgcolor: 'primary.dark' }}>
                           {c.user?.name?.[0]?.toUpperCase()}
                         </Avatar>
-                        <Box sx={{ bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2, px: 2, py: 1, flex: 1 }}>
-                          <Typography variant="caption" fontWeight={600}>
+                        <Box sx={{ bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2, px: 1.5, py: 0.8, flex: 1 }}>
+                          <Typography variant="caption" fontWeight={600} display="block">
                             {c.user?.name}
                           </Typography>
-                          <Typography variant="body2">{c.text}</Typography>
+                          <Typography variant="body2" fontSize="0.82rem">{c.text}</Typography>
                         </Box>
                       </Box>
                     ))}
@@ -354,8 +419,13 @@ export default function FeedPage() {
                             setCommentText({ ...commentText, [post._id]: e.target.value })
                           }
                           onKeyDown={(e) => e.key === 'Enter' && handleComment(post._id)}
+                          sx={{ '& input': { fontSize: '0.85rem', py: 1 } }}
                         />
-                        <IconButton color="primary" onClick={() => handleComment(post._id)}>
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleComment(post._id)}
+                          sx={{ minWidth: 44, minHeight: 44 }}
+                        >
                           <Send fontSize="small" />
                         </IconButton>
                       </Box>
@@ -367,6 +437,26 @@ export default function FeedPage() {
           </Stack>
         )}
       </Container>
+
+      {/* Mobile FAB for creating post */}
+      {isMobile && user && (
+        <Fab
+          color="secondary"
+          onClick={() => setCreateDialogOpen(true)}
+          sx={{
+            position: 'fixed',
+            bottom: 80,
+            right: 20,
+            width: 56,
+            height: 56,
+            boxShadow: '0 4px 20px rgba(255,109,0,0.4)',
+          }}
+        >
+          <Add />
+        </Fab>
+      )}
+
+      <CreatePostDialog />
     </Box>
   );
 }

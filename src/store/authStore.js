@@ -30,9 +30,20 @@ const useAuthStore = create((set) => ({
 
   register: async (userData) => {
     const { data } = await authAPI.register(userData);
+    // OTP sent — don't auto-login, return response for OTP step
+    return data;
+  },
+
+  verifyOtp: async ({ email, otp }) => {
+    const { data } = await authAPI.verifyOtp({ email, otp });
     localStorage.setItem('spark_token', data.token);
     localStorage.setItem('spark_user', JSON.stringify(data.user));
     set({ user: data.user, token: data.token });
+    return data;
+  },
+
+  resendOtp: async (email) => {
+    const { data } = await authAPI.resendOtp({ email });
     return data;
   },
 

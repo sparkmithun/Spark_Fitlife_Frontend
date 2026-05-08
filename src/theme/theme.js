@@ -96,6 +96,10 @@ const theme = createTheme({
           '& .MuiOutlinedInput-root': {
             borderRadius: 10,
           },
+          '& .MuiInputBase-input': {
+            direction: 'ltr',
+            textAlign: 'left',
+          },
         },
       },
     },

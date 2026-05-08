@@ -152,111 +152,7 @@ export default function FeedPage() {
     }
   };
 
-  // Create Post Dialog (full screen on mobile)
-  const CreatePostDialog = () => (
-    <Dialog
-      open={createDialogOpen}
-      onClose={() => setCreateDialogOpen(false)}
-      fullScreen={isMobile}
-      fullWidth
-      maxWidth="sm"
-      TransitionComponent={isMobile ? Slide : undefined}
-      TransitionProps={isMobile ? { direction: 'up' } : undefined}
-    >
-      <DialogTitle
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          pb: 1,
-        }}
-      >
-        <Typography variant="h6" fontWeight={600}>Create Post</Typography>
-        <IconButton onClick={() => setCreateDialogOpen(false)}>
-          <Close />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ pt: 1 }}>
-        <TextField
-          fullWidth
-          multiline
-          minRows={isMobile ? 4 : 3}
-          placeholder="What's on your fitness mind?"
-          value={newPost.content}
-          onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-          sx={{ mb: 2 }}
-          autoFocus
-        />
-
-        {imagePreview && (
-          <Box sx={{ position: 'relative', mb: 2 }}>
-            <Box
-              component="img"
-              src={imagePreview}
-              sx={{
-                width: '100%',
-                maxHeight: isMobile ? 200 : 250,
-                borderRadius: 2,
-                objectFit: 'cover',
-              }}
-            />
-            <IconButton
-              size="small"
-              onClick={clearSelectedImage}
-              sx={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                bgcolor: 'rgba(0,0,0,0.7)',
-                '&:hover': { bgcolor: 'rgba(0,0,0,0.9)' },
-              }}
-            >
-              <Close fontSize="small" />
-            </IconButton>
-          </Box>
-        )}
-
-        <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-          <InputLabel>Category</InputLabel>
-          <Select
-            value={newPost.category}
-            label="Category"
-            onChange={(e) => setNewPost({ ...newPost, category: e.target.value })}
-          >
-            {categories.map((c) => (
-              <MenuItem key={c.value} value={c.value}>{c.label}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 3, pt: 0, gap: 1 }}>
-        <Button
-          component="label"
-          variant="outlined"
-          startIcon={<AddPhotoAlternate />}
-          sx={{ mr: 'auto' }}
-        >
-          Photo
-          <input
-            type="file"
-            hidden
-            accept="image/jpeg,image/png,image/webp"
-            onChange={handleImageSelect}
-          />
-        </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={handleCreatePost}
-          disabled={posting || !newPost.content.trim()}
-          endIcon={<Send />}
-          sx={{ minWidth: 100 }}
-        >
-          {posting ? 'Posting...' : 'Post'}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
+  // CreatePostDialog is inlined in JSX below to avoid re-mount flickering
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: { xs: 10, md: 4 }, pt: { xs: 2, md: 4 } }}>
@@ -285,6 +181,7 @@ export default function FeedPage() {
                     fullWidth
                     placeholder="Share your fitness thoughts..."
                     InputProps={{ readOnly: true }}
+                    inputProps={{ dir: 'ltr', style: { direction: 'ltr', textAlign: 'left' } }}
                     sx={{ pointerEvents: 'none' }}
                   />
                 </Box>
@@ -419,6 +316,7 @@ export default function FeedPage() {
                             setCommentText({ ...commentText, [post._id]: e.target.value })
                           }
                           onKeyDown={(e) => e.key === 'Enter' && handleComment(post._id)}
+                          inputProps={{ dir: 'ltr', style: { direction: 'ltr', textAlign: 'left', unicodeBidi: 'plaintext' } }}
                           sx={{ '& input': { fontSize: '0.85rem', py: 1 } }}
                         />
                         <IconButton
@@ -456,7 +354,109 @@ export default function FeedPage() {
         </Fab>
       )}
 
-      <CreatePostDialog />
+      <Dialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+        fullScreen={isMobile}
+        fullWidth
+        maxWidth="sm"
+        TransitionComponent={isMobile ? Slide : undefined}
+        TransitionProps={isMobile ? { direction: 'up' } : undefined}
+      >
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            pb: 1,
+          }}
+        >
+          <Typography variant="h6" fontWeight={600}>Create Post</Typography>
+          <IconButton onClick={() => setCreateDialogOpen(false)}>
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 1 }}>
+          <TextField
+            fullWidth
+            multiline
+            minRows={isMobile ? 4 : 3}
+            placeholder="What's on your fitness mind?"
+            value={newPost.content}
+            onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
+            inputProps={{ dir: 'ltr', style: { direction: 'ltr', textAlign: 'left', unicodeBidi: 'plaintext' } }}
+            sx={{ mb: 2 }}
+            autoFocus
+          />
+
+          {imagePreview && (
+            <Box sx={{ position: 'relative', mb: 2 }}>
+              <Box
+                component="img"
+                src={imagePreview}
+                sx={{
+                  width: '100%',
+                  maxHeight: isMobile ? 200 : 250,
+                  borderRadius: 2,
+                  objectFit: 'cover',
+                }}
+              />
+              <IconButton
+                size="small"
+                onClick={clearSelectedImage}
+                sx={{
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  bgcolor: 'rgba(0,0,0,0.7)',
+                  '&:hover': { bgcolor: 'rgba(0,0,0,0.9)' },
+                }}
+              >
+                <Close fontSize="small" />
+              </IconButton>
+            </Box>
+          )}
+
+          <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+            <InputLabel>Category</InputLabel>
+            <Select
+              value={newPost.category}
+              label="Category"
+              onChange={(e) => setNewPost({ ...newPost, category: e.target.value })}
+            >
+              {categories.map((c) => (
+                <MenuItem key={c.value} value={c.value}>{c.label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, pt: 0, gap: 1 }}>
+          <Button
+            component="label"
+            variant="outlined"
+            startIcon={<AddPhotoAlternate />}
+            sx={{ mr: 'auto' }}
+          >
+            Photo
+            <input
+              type="file"
+              hidden
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleImageSelect}
+            />
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleCreatePost}
+            disabled={posting || !newPost.content.trim()}
+            endIcon={<Send />}
+            sx={{ minWidth: 100 }}
+          >
+            {posting ? 'Posting...' : 'Post'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -100,6 +100,7 @@ const theme = createTheme({
           '& .MuiInputBase-input': {
             direction: 'ltr',
             textAlign: 'left',
+            unicodeBidi: 'plaintext',
           },
         },
       },

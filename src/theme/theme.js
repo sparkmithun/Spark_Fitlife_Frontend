@@ -3,6 +3,7 @@
 import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
+  direction: 'ltr',
   palette: {
     mode: 'dark',
     primary: {

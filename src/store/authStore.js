@@ -7,6 +7,7 @@ const useAuthStore = create((set) => ({
   user: null,
   token: null,
   loading: true,
+  pendingEmail: null,
 
   initialize: () => {
     if (typeof window !== 'undefined') {
@@ -30,16 +31,27 @@ const useAuthStore = create((set) => ({
 
   register: async (userData) => {
     const { data } = await authAPI.register(userData);
+    set({ pendingEmail: data.email });
+    return data;
+  },
+
+  verifyOTP: async ({ email, otp }) => {
+    const { data } = await authAPI.verifyOTP({ email, otp });
     localStorage.setItem('spark_token', data.token);
     localStorage.setItem('spark_user', JSON.stringify(data.user));
-    set({ user: data.user, token: data.token });
+    set({ user: data.user, token: data.token, pendingEmail: null });
+    return data;
+  },
+
+  resendOTP: async (email) => {
+    const { data } = await authAPI.resendOTP({ email });
     return data;
   },
 
   logout: () => {
     localStorage.removeItem('spark_token');
     localStorage.removeItem('spark_user');
-    set({ user: null, token: null });
+    set({ user: null, token: null, pendingEmail: null });
   },
 
   updateUser: (userData) => {
